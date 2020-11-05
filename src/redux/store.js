@@ -12,7 +12,10 @@ const persistConfig = {
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-const middelwares = [logger];
+const middelwares = [];
+if (process.env.NODE_ENV === "development") {
+  middelwares.push(logger);
+}
 const store = createStore(persistedReducer, applyMiddleware(...middelwares));
 
 export const persistor = persistStore(store);
