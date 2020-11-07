@@ -1,26 +1,43 @@
 import React, { Component } from "react";
 import { Route, Switch } from "react-router-dom";
+import { connect } from "react-redux";
 
-import SHOP_DATA from "./shop.data";
+import { updateShop } from "../../redux/shop/action";
 import CollectionPreview from "../../components/collectionPreview/CollectionPreview";
 import Category from "../category/category";
+import { firestore } from "../../firebase/firebase.util";
+import WithSpinner from "../../components/spinner/spinnerHoc";
+
+const CollectionPreviewWithSpinner = WithSpinner(CollectionPreview);
+const CategoryWithSpinner = WithSpinner(Category);
 
 class Shop extends Component {
-  state = {
-    collections: SHOP_DATA,
-  };
+  state = { isLoading: true };
+  componentDidMount() {
+    const collectionRef = firestore.collection("collection");
+    collectionRef.onSnapshot((snapshot) => {
+      const data = snapshot.docs.map((doc) => {
+        return doc.data();
+      });
+      this.props.dispatch(updateShop(data));
+      this.setState({ isLoading: false });
+    });
+  }
 
   render() {
     const { match } = this.props;
-    const collections = this.state.collections;
-    console.log(this.props);
+    const collections = this.props.collections
+      ? this.props.collections.collections
+      : [];
+
     return (
       <div>
         <Switch>
           <Route exact path={`${match.path}`}>
             {collections.map((collection) => {
               return (
-                <CollectionPreview
+                <CollectionPreviewWithSpinner
+                  isLoading={this.state.isLoading}
                   key={collection.id}
                   items={collection.items}
                   title={collection.title}
@@ -29,11 +46,20 @@ class Shop extends Component {
             })}
           </Route>
 
-          <Route path={`${match.path}/:category`} component={Category}></Route>
+          <Route
+            path={`${match.path}/:category`}
+            render={() => (
+              <CategoryWithSpinner isLoading={this.state.isLoading} />
+            )}
+          ></Route>
         </Switch>
       </div>
     );
   }
 }
 
-export default Shop;
+const mapStateToProps = (state) => ({
+  collections: state.collections,
+});
+
+export default connect(mapStateToProps)(Shop);

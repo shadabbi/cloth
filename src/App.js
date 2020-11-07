@@ -9,6 +9,7 @@ import Sign from "./pages/sign/Sign";
 import Header from "./components/header/Header";
 import Checkout from "./pages/checkout/Checkout";
 import Category from "./pages/category/category";
+
 import { auth, createUserProfile } from "./firebase/firebase.util";
 import { setCurrentUser } from "./redux/User/userAction";
 

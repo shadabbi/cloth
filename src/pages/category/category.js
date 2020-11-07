@@ -1,4 +1,5 @@
 import React from "react";
+import { withRouter } from "react-router-dom";
 
 import SHOP_DATA from "../shop/shop.data";
 import classes from "./category.module.scss";
@@ -6,8 +7,6 @@ import CollectionItem from "../../components/collectionItem/CollectionItem";
 
 function category(props) {
   const data = SHOP_DATA.filter((item) => {
-   
-
     return item.routeName === props.match.params.category;
   });
 
@@ -20,8 +19,8 @@ function category(props) {
       <div className={classes.preview}>
         {data.map((item) =>
           item.items.map((item) => (
-              <CollectionItem 
-                  margin
+            <CollectionItem
+              margin
               name={item.name}
               item={item}
               price={item.price}
@@ -35,4 +34,4 @@ function category(props) {
   );
 }
 
-export default category;
+export default withRouter(category);
