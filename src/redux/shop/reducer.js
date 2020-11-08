@@ -1,13 +1,31 @@
+import actionTypes from "./actionType";
+
 const initState = {
   collections: [],
+  isFetching: false,
+  errorMessage: "",
 };
 
 const shopReducer = (state = initState, action) => {
   switch (action.type) {
-    case "UPDATE_SHOP":
+    case actionTypes.FETCH_COLLECTIONS_START:
       return {
         ...state,
+        isFetching: true,
+      };
+
+    case actionTypes.FETCH_COLLECTIONS_SUCCESS:
+      return {
+        ...state,
+        isFetching: false,
         collections: action.payload,
+      };
+
+    case actionTypes.FETCH_COLLECTIONS_FAILURE:
+      return {
+        ...state,
+        isFetching: false,
+        errorMessage: action.payload,
       };
 
     default:

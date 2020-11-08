@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useEffect } from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 
@@ -13,48 +13,43 @@ import Category from "./pages/category/category";
 import { auth, createUserProfile } from "./firebase/firebase.util";
 import { setCurrentUser } from "./redux/User/userAction";
 
-class App extends Component {
-  unsubscribeFromAuth = null;
-  componentDidMount() {
-    this.unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
+const App = (props) => {
+  useEffect(() => {
+    const unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
       if (userAuth) {
         const userRef = await createUserProfile(userAuth);
         userRef.onSnapshot((snapShot) => {
-          this.props.setCurrentUser({
+          props.setCurrentUser({
             id: snapShot.id,
             ...snapShot.data(),
           });
         });
       } else {
-        this.props.setCurrentUser(userAuth);
+        props.setCurrentUser(userAuth);
       }
     });
-  }
 
-  componentWillUnmount() {
-    this.unsubscribeFromAuth();
-  }
+    return function cleanup() {
+      unsubscribeFromAuth();
+    };
+  }, []);
 
-  render() {
-    return (
-      <div>
-        <Header />
-        <Switch>
-          <Route path="/" exact component={Homepage}></Route>
-          <Route path="/Shop" component={Shop}></Route>
-          <Route path="/checkout" component={Checkout}></Route>
-          <Route
-            path="/sign"
-            render={() =>
-              this.props.currentUser ? <Redirect to="/" /> : <Sign />
-            }
-          ></Route>
-          <Route path="/:category" component={Category}></Route>
-        </Switch>
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <Header />
+      <Switch>
+        <Route path="/" exact component={Homepage}></Route>
+        <Route path="/Shop" component={Shop}></Route>
+        <Route path="/checkout" component={Checkout}></Route>
+        <Route
+          path="/sign"
+          render={() => (props.currentUser ? <Redirect to="/" /> : <Sign />)}
+        ></Route>
+        <Route path="/:category" component={Category}></Route>
+      </Switch>
+    </div>
+  );
+};
 
 const mapDispatchToProps = (dispatch) => {
   return {
